@@ -1,2 +1,2 @@
 # Learning
-Repository of knowledge
+Repository to learn
