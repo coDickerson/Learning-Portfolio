@@ -1,11 +1,10 @@
-from main import df, source_company_map
 import pandas as pd
 
 # recommend other correlated companies to meet based on previous behavior
 # ie: 80% of the clients who requested meetings with Block also requested meetings with Dataiku…
 #     do you want to go ask your client if they might be interested?
 
-def recommend(source_company_id, threshold=.4):
+def recommend(df, source_company_id, source_company_map,  threshold=.4):
     # binary interaction matrix
     # describes if a target company was requested by a source, 1=yes and 0=no
     interaction_matrix = pd.crosstab(df['source_company'], df['target_company'])
