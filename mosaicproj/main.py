@@ -3,14 +3,16 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from classificationcluster import classify, visualize
+from source_company import SourceCompany
 
 #cleans excel spreadsheet into dataframe
 df = pd.read_excel("Conf 2024 Request List Update.xlsx")
-df = df.drop(columns=['Source Full Name', 'Source First', 'Source Last', 'Request Date Created'])
+df = df.drop(columns=['Source Full Name', 'Source First', 'Source Last'])
 df = df.rename(columns = 
             {
-            'Target Company - who was requested to meet':'target company',''
+            'Target Company - who was requested to meet':'target company',
             'Source Company - who made the request':'source company', 
+            'Request Date Created' : 'request date'
             }
         )
 df.columns = [col.strip().lower().replace(" ", "_") for col in df.columns]
@@ -18,7 +20,16 @@ cols = df.columns.to_list()
 cols[0], cols[1] = cols[1], cols[0]
 df = df[cols] # flips source company and target company columns
 df = df.drop_duplicates()
-# print(df.head())
+# print(df.head(10))
+
+grouped = df.groupby('source_company')
+source_company_map = {}
+for source_id, group in grouped:
+    requested = group['target_company'].tolist()
+    dates = set(group['request_date']) 
+    source_company_map[source_id] = SourceCompany(source_id, requested, dates)
+
+print(source_company_map[1001])
 
 # binary interaction matrix
 # describes if a target company was requested by a source, 1=yes and 0=no
@@ -50,4 +61,4 @@ significant_pairs = significant_pairs.sort_values(by='correlation', ascending=Fa
 # plt.title("Correlation of Requested Companies")
 # plt.show()
 
-classify(interaction_matrix=interaction_matrix)
+
