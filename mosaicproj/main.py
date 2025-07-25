@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from classificationcluster import classify, visualize
 from source_company import SourceCompany
+from recommender import recommend
 
 #cleans excel spreadsheet into dataframe
 df = pd.read_excel("Conf 2024 Request List Update.xlsx")
@@ -27,5 +28,7 @@ for source_id, group in grouped:
     dates = set(group['request_date']) 
     source_company_map[source_id] = SourceCompany(source_id, requested, dates)
 
-
+user_input = input("Enter source company ID (e.g. 1000): ")
+source_id = int(user_input)
+recommend(source_id)
 
