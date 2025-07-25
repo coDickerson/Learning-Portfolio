@@ -29,7 +29,7 @@ for source_id, group in grouped:
     dates = set(group['request_date']) 
     source_company_map[source_id] = SourceCompany(source_id, requested, dates)
 
-user_input = input("Enter source company ID (e.g. 1000): ")
+user_input = input("Enter source company ID (e.g. 1000-1342): ")
 source_id = int(user_input)
 recommend(df, source_id, source_company_map)
 

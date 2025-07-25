@@ -30,13 +30,11 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
     company_pairs = company_pairs[company_pairs['company_a'] < company_pairs['company_b']] # deals with duplicates and same company correlations
     significant_pairs = company_pairs[company_pairs['correlation'] > threshold] 
     filtered = significant_pairs [
-    ((significant_pairs['company_a'].isin(requested_companies)) & (~company_pairs['company_b'].isin(requested_companies))) | 
-    ((significant_pairs['company_b'].isin(requested_companies)) & (~company_pairs['company_a'].isin(requested_companies)))
+    ((significant_pairs['company_a'].isin(requested_companies)) & (~significant_pairs['company_b'].isin(requested_companies))) | 
+    ((significant_pairs['company_b'].isin(requested_companies)) & (~significant_pairs['company_a'].isin(requested_companies)))
     ]
     filtered = filtered.sort_values(by='correlation', ascending=False)
 
-    # print(filtered)
-    # print(f'\n {source_company_row.requested}')
 
     # adds other company and correlation to suggestions list
     suggestions = []
