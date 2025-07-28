@@ -33,7 +33,7 @@ def classify(recommendation_df, interaction_matrix):
     visualize(X_reduced, clusters, labels=subset_matrix.index.tolist()) 
 
 
-# visualization of PCA
+# hoverable visualization of PCA
 def visualize(X_reduced, clusters, labels):
      # Build a DataFrame for plotting
     df_plot = pd.DataFrame({
@@ -49,7 +49,7 @@ def visualize(X_reduced, clusters, labels):
         y='PC2',
         color='Cluster',
         hover_name='Company',
-        title='Investor Cohorts via KMeans (Hoverable)',
+        title='Company Cohorts via KMeans (Hoverable)',
         width=900,
         height=600
     )

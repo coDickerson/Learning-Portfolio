@@ -53,6 +53,17 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
 
     print("\nHere are a list of similar companies that are based on your previous company requests:\n")
     print(recommendations_df.head(10))
-    classify(recommendations_df, interaction_matrix)
+
+    while(True) :
+        user_input = input('Would you like a visualization (y/n):\n').strip().lower()
+        if user_input == 'y':
+            classify(recommendations_df, interaction_matrix)
+            break
+        elif user_input == 'n':
+            print("Visualization skipped.")
+            break
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
+
     return (recommendations_df)
     
