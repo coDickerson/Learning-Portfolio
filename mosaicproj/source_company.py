@@ -8,4 +8,4 @@ class SourceCompany:
         self.recommended = []
      
     def __repr__(self):
-        return f"Source Company(id={self.id}, requested={self.requested}, date={self.dates}, recommended={self.recommended})"
+        return f"Source Company(id={self.id}, requested={self.requested}, dates={self.dates}, recommended={self.recommended})"

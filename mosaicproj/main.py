@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from classificationcluster import classify, visualize
 from source_company import SourceCompany
 from recommender_engine import recommend
 
@@ -29,6 +28,7 @@ for source_id, group in grouped:
     dates = set(group['request_date']) 
     source_company_map[source_id] = SourceCompany(source_id, requested, dates)
 
+# obtains input from user
 user_input = input("Enter source company ID (e.g. 1000-1342): ")
 source_id = int(user_input)
 recommend(df, source_id, source_company_map)

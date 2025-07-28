@@ -1,4 +1,6 @@
 import pandas as pd
+from sklearn.cluster import KMeans 
+from classificationcluster import classify
 
 # recommend other correlated companies to meet based on previous behavior
 # ie: 80% of the clients who requested meetings with Block also requested meetings with Dataiku…
@@ -51,6 +53,6 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
 
     print("\nHere are a list of similar companies that are based on your previous company requests:\n")
     print(recommendations_df.head(10))
+    classify(recommendations_df, interaction_matrix)
     return (recommendations_df)
-    
     
