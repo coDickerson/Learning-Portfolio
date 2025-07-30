@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.cluster import KMeans 
+from sklearn.metrics.pairwise import cosine_similarity
 from classificationcluster import classify
 
 # recommend other correlated companies to meet based on previous behavior
@@ -22,7 +23,12 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
     # source company row from map and list of requested companies
     source_company_row = source_company_map[source_company_id]
     requested_companies = source_company_row.requested
+
+    pairwise_recs = pairwise(interaction_matrix, company_corr, requested_companies, threshold)
+    # multivector_recs = multivector(interaction_matrix, source_company_id, requested_companies)
+    visualization(interaction_matrix, pairwise_recs)
     
+def pairwise(company_corr, requested_companies, threshold):
     # flattens correlation matrix into a workable table
     # filters out correlation below threshold and finds pairs with one company from requsted companies list
     company_corr.columns.name = None
@@ -36,8 +42,6 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
     ((significant_pairs['company_b'].isin(requested_companies)) & (~significant_pairs['company_a'].isin(requested_companies)))
     ]
     filtered = filtered.sort_values(by='correlation', ascending=False)
-
-
     # adds other company and correlation to suggestions list
     suggestions = []
     for _, row in filtered.iterrows():
@@ -45,15 +49,34 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
             suggestions.append((row['company_b'], row['correlation']))
         elif row['company_b'] in requested_companies and row['company_a'] not in requested_companies:
             suggestions.append((row['company_a'], row['correlation']))
-
     # adds suggestions to data frame to be printed
     recommendations_df = pd.DataFrame(suggestions, columns=['recommended company', 'correlation'])
     recommendations_df = recommendations_df.drop_duplicates(subset='recommended company')
     recommendations_df = recommendations_df.sort_values(by='correlation', ascending=False)
+    return recommendations_df
 
+    
+def multivector(interaction_matrix, source_company_id, requested_companies, top_n = 10):
+    profile_vector = interaction_matrix.loc[source_company_id]
+    company_vectors = interaction_matrix.T
+    similarity_scores = cosine_similarity(company_vectors, profile_vector.values.reshape(1, -1)).flatten()
+    # Assemble recommendation table
+    similarity_df = pd.DataFrame({
+        'company': company_vectors.index,
+        'similarity': similarity_scores
+    })
+    # Remove already requested companies
+    similarity_df = similarity_df[~similarity_df['company'].isin(requested_companies)]
+    # Top recommendations
+    recommendations_df = similarity_df.sort_values(by='similarity', ascending=False).head(top_n)
+    print("\nHere are your top recommendations based on your full request profile:\n")
+    print(recommendations_df)
+    return recommendations_df
+
+
+def visualization(interaction_matrix, recommendations_df):   
     print("\nHere are a list of similar companies that are based on your previous company requests:\n")
     print(recommendations_df.head(10))
-
     while(True) :
         user_input = input('Would you like a visualization (y/n):\n').strip().lower()
         if user_input == 'y':
@@ -64,6 +87,4 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
             break
         else:
             print("Invalid input. Please enter 'y' or 'n'.")
-
     return (recommendations_df)
-    

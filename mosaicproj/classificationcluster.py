@@ -35,7 +35,7 @@ def classify(recommendation_df, interaction_matrix):
 
 # hoverable visualization of PCA
 def visualize(X_reduced, clusters, labels):
-     # Build a DataFrame for plotting
+    # Build a DataFrame for plotting
     df_plot = pd.DataFrame({
         'PC1': X_reduced[:, 0],
         'PC2': X_reduced[:, 1],
