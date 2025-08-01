@@ -7,7 +7,7 @@ from classificationcluster import classify
 # ie: 80% of the clients who requested meetings with Block also requested meetings with Dataiku…
 #     do you want to go ask your client if they might be interested?
 
-def recommend(df, source_company_id, source_company_map,  threshold=.4):
+def recommend(df, source_company_id, source_company_map, threshold=.4):
     # binary interaction matrix
     # describes if a target company was requested by a source, 1=yes and 0=no
     interaction_matrix = pd.crosstab(df['source_company'], df['target_company'])
@@ -24,9 +24,9 @@ def recommend(df, source_company_id, source_company_map,  threshold=.4):
     source_company_row = source_company_map[source_company_id]
     requested_companies = source_company_row.requested
 
-    pairwise_recs = pairwise(interaction_matrix, company_corr, requested_companies, threshold)
+    pairwise_recs = pairwise(company_corr, requested_companies, threshold)
     # multivector_recs = multivector(interaction_matrix, source_company_id, requested_companies)
-    visualization(interaction_matrix, pairwise_recs)
+    visualize(interaction_matrix, pairwise_recs)
     
 def pairwise(company_corr, requested_companies, threshold):
     # flattens correlation matrix into a workable table
@@ -57,24 +57,62 @@ def pairwise(company_corr, requested_companies, threshold):
 
     
 def multivector(interaction_matrix, source_company_id, requested_companies, top_n = 10):
-    profile_vector = interaction_matrix.loc[source_company_id]
-    company_vectors = interaction_matrix.T
-    similarity_scores = cosine_similarity(company_vectors, profile_vector.values.reshape(1, -1)).flatten()
-    # Assemble recommendation table
-    similarity_df = pd.DataFrame({
-        'company': company_vectors.index,
-        'similarity': similarity_scores
+    """
+    Collaborative filtering approach: find similar investors and recommend 
+    companies they liked that the source investor hasn't requested yet.
+    """
+    source_profile = interaction_matrix.loc[source_company_id]
+    investor_similarities = cosine_similarity(source_profile.values.reshape(1, -1), interaction_matrix.values).flatten()
+
+    investor_sim_df = pd.DataFrame({
+        'investor': interaction_matrix.index,
+        'similarity': investor_similarities
     })
-    # Remove already requested companies
-    similarity_df = similarity_df[~similarity_df['company'].isin(requested_companies)]
-    # Top recommendations
-    recommendations_df = similarity_df.sort_values(by='similarity', ascending=False).head(top_n)
-    print("\nHere are your top recommendations based on your full request profile:\n")
-    print(recommendations_df)
+
+    investor_sim_df = investor_sim_df[investor_sim_df['investor'] != source_company_id]
+    similar_investors = investor_sim_df.sort_values('similarity', ascending=False)
+    company_scores = {}
+    
+    for company in interaction_matrix.columns:
+        if company in requested_companies:
+            continue  # Skip already requested companies
+            
+        weighted_score = 0
+        total_weight = 0
+        
+        for _, row in similar_investors.iterrows():
+            investor = row['investor']
+            similarity = row['similarity']
+            
+            # Check if this similar investor requested this company
+            if interaction_matrix.loc[investor, company] == 1:
+                weighted_score += similarity
+                total_weight += similarity
+        
+        # Normalize by total weight to get average weighted interest
+        if total_weight > 0:
+            company_scores[company] = weighted_score / total_weight
+        else:
+            company_scores[company] = 0
+    
+    # Convert to DataFrame and sort
+    recommendations_df = pd.DataFrame(
+        list(company_scores.items()), 
+        columns=['company', 'recommendation_score']
+    )
+    
+    recommendations_df = recommendations_df.sort_values(
+        'recommendation_score', 
+        ascending=False
+    ).head(top_n)
+    
+    visualize(interaction_matrix, recommendations_df)
     return recommendations_df
 
 
-def visualization(interaction_matrix, recommendations_df):   
+
+
+def visualize(interaction_matrix, recommendations_df):   
     print("\nHere are a list of similar companies that are based on your previous company requests:\n")
     print(recommendations_df.head(10))
     while(True) :
