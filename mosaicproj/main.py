@@ -29,7 +29,43 @@ for source_id, group in grouped:
     source_company_map[source_id] = SourceCompany(source_id, requested, dates)
 
 # obtains input from user
-user_input = input("Enter source company ID (e.g. 1000-1342): ")
-source_id = int(user_input)
-recommend(df, source_id, source_company_map)
+user_input = input("\nEnter source company ID (e.g. 1000-1342): ").strip()
+print("Available recommendation methods:")
+print("1. Pairwise (correlation-based)")
+print("2. Multivector (collaborative filtering)")
+print("3. Hybrid (combines both methods)")
+method_input = input("Enter method number (1-3) or press Enter for multivector: ").strip()
 
+# Parse inputs
+try:
+    source_id = int(user_input)
+except ValueError:
+    print("Invalid company ID format. Please enter a numeric ID.")
+    exit()
+
+# Method selection
+method_map = {'1': 'pairwise', '2': 'multivector', '3': 'hybrid'}
+method = method_map.get(method_input, 'multivector')  # Default to multivector
+
+print(f"\nUsing {method} method for recommendations...")
+
+# Generate recommendations
+try:
+    recommendations = recommend(
+        df, 
+        source_id, 
+        source_company_map, 
+        method=method,
+        threshold=0.4,  # For pairwise method
+        top_n=10
+    )
+    
+    if not recommendations.empty:
+        print(f"\n=== FINAL RECOMMENDATIONS ===")
+        print(recommendations.to_string(index=False))
+    else:
+        print("\nNo recommendations could be generated for this investor.")
+        
+except Exception as e:
+    print(f"Error generating recommendations: {e}")
+    print("Please check your input and try again.")
