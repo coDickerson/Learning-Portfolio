@@ -1,2 +1,2 @@
 # Learning
-Repository to learn
+Repository to learn and try things
