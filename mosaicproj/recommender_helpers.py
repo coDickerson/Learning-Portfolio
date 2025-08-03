@@ -13,19 +13,17 @@ def convert_to_recommendations_df(scores, method, top_n):
     Returns:
         pd.DataFrame: Formatted recommendations with appropriate column names
     """
+    score_column = get_score_column_name(method)
+
     if not scores:
         # Return empty DataFrame with appropriate columns based on method
-        score_column = get_score_column_name(method)
         return pd.DataFrame(columns=['recommended company', score_column])
-    
-    # Get the appropriate score column name
-    score_column = get_score_column_name(method)
     
     # Convert to DataFrame
     recommendations_df = pd.DataFrame(
         list(scores.items()),
         columns=['recommended company', score_column]
-    ).sort_values(score_column, ascending=False).head(top_n)
+    ).sort_values(score_column, ascending=False)
     
     # Print results with method-specific messaging
     print_results(recommendations_df, method, top_n)

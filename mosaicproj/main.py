@@ -62,7 +62,7 @@ try:
     
     if not recommendations.empty:
         print(f"\n=== FINAL RECOMMENDATIONS ===")
-        print(recommendations.to_string(index=False))
+        print(recommendations.head(10))
     else:
         print("\nNo recommendations could be generated for this investor.")
         

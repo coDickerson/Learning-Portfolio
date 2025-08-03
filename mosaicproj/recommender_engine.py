@@ -85,21 +85,6 @@ def pairwise_recommend(interaction_matrix, requested_companies, threshold, top_n
     
     return convert_to_recommendations_df(recommendation_scores, 'pairwise', top_n)
 
-    # # Convert to DataFrame - using column name that matches classify function
-    # if not recommendation_scores:
-    #     print("No significant correlations found above threshold.")
-    #     return pd.DataFrame(columns=['recommended company', 'correlation'])
-    
-    # recommendations_df = pd.DataFrame(
-    #     list(recommendation_scores.items()),
-    #     columns=['recommended company', 'correlation']  # Match classify function expectation
-    # ).sort_values('correlation', ascending=False)
-    
-    # print(f"\nPairwise recommendations based on correlations > {threshold}:")
-    # print(recommendations_df.head(top_n))
-    
-    # return recommendations_df
-
 
 def multivector_recommend(interaction_matrix, source_company_id, requested_companies, top_n):
     """
@@ -143,21 +128,6 @@ def multivector_recommend(interaction_matrix, source_company_id, requested_compa
 
     return convert_to_recommendations_df(company_scores, 'multivector', top_n)
 
-    # # Convert to DataFrame - using column name that matches classify function
-    # if not company_scores:
-    #     print("No recommendations found based on similar investors.")
-    #     return pd.DataFrame(columns=['recommended company', 'similarity'])
-    
-    # recommendations_df = pd.DataFrame(
-    #     list(company_scores.items()),
-    #     columns=['recommended company', 'similarity']  # Match classify function expectation
-    # ).sort_values('similarity', ascending=False)
-    
-    # print("\nMultivector recommendations based on similar investor preferences:")
-    # print(recommendations_df.head(top_n))
-    
-    # return recommendations_df
-
 
 def hybrid_recommend(interaction_matrix, source_company_id, requested_companies, threshold, top_n):
     """
@@ -190,12 +160,3 @@ def hybrid_recommend(interaction_matrix, source_company_id, requested_companies,
             hybrid_scores[company] = hybrid_scores.get(company, 0) + (normalized_score * 0.4)
     
     return convert_to_recommendations_df(hybrid_scores, 'hybrid', top_n)
-
-    # # Convert to DataFrame
-    # recommendations_df = convert_to_recommendations_df(hybrid_scores, method)
-    
-    # print("\nHybrid recommendations combining pairwise and multivector approaches:")
-    # print(recommendations_df.head(top_n))
-    
-    # return recommendations_df
-

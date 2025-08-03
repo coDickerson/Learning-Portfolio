@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import plotly.express as px
@@ -25,10 +24,10 @@ def classify(recommendation_df, interaction_matrix):
     clustered_df = subset_matrix.copy()
     clustered_df['clusters'] = clusters
 
-    for cluster_num in sorted(clustered_df['clusters'].unique()):
-        cluster_data = clustered_df[clustered_df['clusters'] == cluster_num].drop(columns='clusters')
-        top_companies = cluster_data.sum(axis=1).sort_values(ascending=False).head(5)
-        print(f"\nTop 5 companies for Cluster {cluster_num}:\n{top_companies}")
+    # for cluster_num in sorted(clustered_df['clusters'].unique()):
+    #     cluster_data = clustered_df[clustered_df['clusters'] == cluster_num].drop(columns='clusters')
+    #     top_companies = cluster_data.sum(axis=1).sort_values(ascending=False).head(5)
+    #     print(f"\nTop 5 companies for Cluster {cluster_num}:\n{top_companies}")
 
     visualize(X_reduced, clusters, labels=subset_matrix.index.tolist()) 
 
