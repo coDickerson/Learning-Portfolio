@@ -5,27 +5,27 @@ from recommender_engine import recommend
 
 
 #cleans excel spreadsheet into dataframe
-df = pd.read_excel("Conf 2024 Request List Update.xlsx")
-df = df.drop(columns=['Source Full Name', 'Source First', 'Source Last'])
-df = df.rename(columns = 
-            {
-            'Target Company - who was requested to meet':'target company',
-            'Source Company - who made the request':'source company', 
-            'Request Date Created' : 'request date'
-            }
-        )
-df.columns = [col.strip().lower().replace(" ", "_") for col in df.columns]
-cols = df.columns.to_list()
+company_df = pd.read_excel("Conf 2024 Request List Update.xlsx")
+company_df = company_df.drop(columns=['Source Full Name', 'Source First', 'Source Last'])
+company_df = company_df.rename(columns = 
+    {  
+        'Target Company - who was requested to meet':'target company',
+        'Source Company - who made the request':'source company', 
+        'Request Date Created' : 'request date'
+    }
+)
+company_df.columns = [col.strip().lower().replace(" ", "_") for col in company_df.columns]
+cols = company_df.columns.to_list()
 cols[0], cols[1] = cols[1], cols[0]
-df = df[cols] # flips source company and target company columns
-df = df.drop_duplicates()
+company_df = company_df[cols] # flips source company and target company columns
+company_df = company_df.drop_duplicates()
 
 # creates the source company map containing id, requested, dates, and recommended
-grouped = df.groupby('source_company')
+grouped = company_df.groupby('source_company')
 source_company_map = {}
 for source_id, group in grouped:
     requested = group['target_company'].tolist()
-    dates = set(group['request_date']) 
+    dates = set(group['request_date'])        
     source_company_map[source_id] = SourceCompany(source_id, requested, dates)
 
 # obtains input from user
@@ -33,8 +33,7 @@ user_input = input("\nEnter source company ID (e.g. 1000-1342): ").strip()
 print("Available recommendation methods:")
 print("1. Pairwise (correlation-based)")
 print("2. Multivector (collaborative filtering)")
-print("3. Hybrid (combines both methods)")
-method_input = input("Enter method number (1-3) or press Enter for multivector: ").strip()
+method_input = input("Enter method number (1-2) or press Enter for multivector: ").strip()
 
 # Parse inputs
 try:
@@ -44,7 +43,7 @@ except ValueError:
     exit()
 
 # Method selection
-method_map = {'1': 'pairwise', '2': 'multivector', '3': 'hybrid'}
+method_map = {'1': 'pairwise', '2': 'multivector'}
 method = method_map.get(method_input, 'multivector')  # Default to multivector
 
 print(f"\nUsing {method} method for recommendations...")
@@ -52,7 +51,7 @@ print(f"\nUsing {method} method for recommendations...")
 # Generate recommendations
 try:
     recommendations = recommend(
-        df, 
+        company_df, 
         source_id, 
         source_company_map, 
         method=method,

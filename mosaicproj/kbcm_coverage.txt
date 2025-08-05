@@ -1,0 +1,44 @@
+KBCM Coverage
+ 
+TMT:
+Jackson Ader (Enterprise/Front-Office Software): ADBE, AKAM, AMPL, ASAN, CRM, CXM, FIVN, FSLY, GTM, HUBS, KVYO, MNDY, MSFT, NET, NOW, ORCL, RNG, SAP.GY, SEMR, SPT, TWLO, ZETA, ZM
+Eric Heath (Security Software): AI, CFLT, CHKP, CRWD, CVLT, CYBR, DDOG, DT, ESTC, FTNT, MDB, OKTA, PANW, RBRK, RPD, S, SNOW, ZS
+Jason Celino (Vertical Software): ADSK, ANSS, APPF, APPN, BSY, CDNS, CHGG, COUR, DAY, DSY-FR, FROG, GTLB, PATH, PAYC, PCOR, PCTY, PEGA, PRO, PTC, SNPS, TEAM, TRMB, TTAN, UDMY, WDAY
+Alex Markgraff (FinTech): ADYEN.AS, ALKT, AVDX, BILL, COIN, FI, FIS, GPN, HOOD, IIIV, IMXI, INTU, MA, MQ, NCNO, NU, PAGS, PYPL, QTWO, RELY, V, XYZ
+Justin Patterson (Internet): ABNB, ANGI, BIGC, CART, CRTO, DASH, DUOL, DV, EB, FTDR, GLBE, GOOGL, IAC, IAS, LYFT, META, NFLX, NRDS, PINS, PUBM, ROKU, SHOP, SNAP, SPOT, TTD, UBER, VTEX, WIX, YELP, ZG, ZIP
+Brandon Nispel (Communication Services): AAPL, AMT, ANET, CABO, CCI, CCOI, CHTR, CMCSA, CSCO, DELL, DIS, DLR, EQIX, HPE, NTNX, SBAC, SMCI, T, TMUS, VZ, WBD, WOW
+John Vinh (Semiconductors): ADI, AMBA, AMD, ARM, AVGO, CRUS, INDI, INTC, LSCC, MCHP, MPWR, MRVL, MU, NVDA, NXPI, ON, QCOM, QRVO, SLAB, SWKS, SYNA, TXN
+Steve Barger (Semicap Equipment, EMS): AEIS, AMAT, FLEX, KLAC, LRCX, MKSI, PLXS, TER
+ 
+Industrials:
+Jeff Hammond (Industrials): AOS, ATKR, CARR, ETN, GGG, GNRC, GTES, HAYW, HI, HLIO, ITT, JBI, LII, MIDD, MOD, NDSN, NPO, NVT, PH, PNR, RRX, TT, WMS, WSO, WTS, ZWS
+Steve Barger (Machinery): AME, AMKR, FSS, KMT, LECO, MYE, OSK, PKOH, RBC, TEX, TKR, WAB
+Ken Newman (Distributors, Automation): AHT.L, AIT, BOOM, CGNX, DSGR, EMR, FAST, GWW, HRI, MSM, ROK, SYM, TRS, URI, WCC, ZBRA
+Sangita Jain (E&C, Hydrogen): ACM, ARCAD, BE, BLDP, CTRI, DY, EME, FCEL, FIX, FLR, J, KBR, MTZ, MYRG, PLUG, PRIM, PSN, PWR, TTEK
+Michael Leshock (Aerospace & Defense): AIR, HEI,RKLB, SPCE, SPR, TDG
+ 
+Materials:
+Aleksey Yefremov (Chemicals): ALB, AXTA, CE, CTVA, DD, DOW, ECVT, EMN, ENTG, ESI, FMC, HUN, LYB, OLN, PPG, RPM, SHW, WLK
+Phil Gibbs (Steel): ATI, CLF, CMC, CRS, HWM, HXL, MT, MTRN, MTUS, NUE, RDUS, RS, RYI, STLD, WS, ZEUS
+                                                                                                               
+Energy/Utilities:
+Tim Rezvan (E&P): BKV, BSM, CIVI, CRGY, CRK, DEC, EOG, EXE, FANG, GPOR, INR, KRP, MGY, MTDR, MUR, SM, STR, TALO, VNOM, VTLE
+Sophie Karp (Utilities & Alternatives): AEE, AEP, ARRY, AVA, CEG, CMS, CNP, D, DTE, DUK, ED, ENPH, ES, ETR, EXC, FE, FSLR, HASI, NEE, NEW, NXT, OTTR, PEG, PNW, POR, RUN, SEDG, SO, SRE, WEC, XEL, XIFR
+ 
+Consumer:
+Eric Gonzalez (Restaurants): CMG, DENN, DIN, DPZ, DRI, EAT, JACK, MCD, PZZA, QSR, SBUX, SG, SHAK, TXRH, WEN, YUM
+Brad Thomas (Hardlines): BBY, CASY, CENTA, DG, DLTR, ETD, FIVE, HD, LOW, LZB, MUSA, OLLI, PRG, PRPL, RH, SGI, SNBR, TGT, TSCO, UPBD, W, WMT, WSM
+Noah Zatzkin (Leisure & Performance Brands): BC, CWH, GOLF, GRMN, HOG, MBUU, MCFT, MODG, ONEW, PATK, PII, THO, WGO, YETI
+Ashley Owens (E-Com, Apparel): AKA, BOOT, BRLT, CAL, CROX, DECK, ETSY, FIGS, GIII, LULU, NKE, ONON, OXM, REAL, RVLV, WWW
+ 
+Healthcare:
+Paul Knight (Life Science Tools): A, AVTR, AZTA, BLFS, CSTL, CYRX, DHR, GXIG, HBIO, LAB, LONN, MLAB, MRVI, RGEN, RPID, RVTY, SATG, STVN, TECH, TKNO, TMO, WAT, WST, XGN
+Scott Schoenhaus (Healthcare IT): ABCL, ABSI, ALIT, CERT, DOCS, GDRX, HCAT, HNGE, HQY, LFMD, LFST, ODD, OMCL, PGNY, PHR, RXRX, SDGR, SLP, TALK, TDOC, VEEV
+Brett Fishbin (MedTech): ALC, COO, ICUI, INSP, ITGR, LMAT, RMD, SHC, SOLV, STE, UFPT
+Matthew Gillmor (Healthcare Services): ACHC, ADUS, ALHC, ARDT, ASTH, BTSG, EHC, EVH, HCA, HUM, INNV, PRVA, SGRY, THC, UNH, UHS
+ 
+REITs:
+Todd Thomas (Industrial, Retail, Storage, Gaming): AAT, AKR, BRX, COLD, CUBE, CURB, EGP, EXR, FR, GLPI, KRG, LINE, LXP, MAC, NSA, PECO, PLD, PLYM, PSA, REG, SITC, SKT, SMA, TRNO, VICI
+Austin Wurschmidt (Lodging, Apartments, Healthcare): AHR, AMH, APLE, AVB, CPT, CTRE, DOC, DRH, ESS, GMRE, HR, INN, INVH, IRT, LTC, MAA, MPW, NHI, RLJ, SBRA, UDR, VTR, WELL, XHR
+Upal Rana (Office, Triple-Net): ADC, BDN, BNL, BXP, CIO, CUZ, DEI, EPR, GNL, GTY, KRC, NTST, O
+ 

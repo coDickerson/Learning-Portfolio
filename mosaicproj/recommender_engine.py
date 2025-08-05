@@ -11,7 +11,7 @@ def recommend(df, source_company_id, source_company_map, method='multivector', t
         df: DataFrame with columns ['source_company', 'target_company']
         source_company_id: ID of the investor to generate recommendations for
         source_company_map: Mapping of company IDs to their data
-        method: 'pairwise', 'multivector', or 'hybrid'
+        method: 'pairwise', 'multivector'
         threshold: Minimum correlation threshold for pairwise method
         top_n: Number of recommendations to return
 
@@ -39,10 +39,8 @@ def recommend(df, source_company_id, source_company_map, method='multivector', t
         recommendations_df = pairwise_recommend(interaction_matrix, requested_companies, threshold, top_n)
     elif method == 'multivector':
         recommendations_df = multivector_recommend(interaction_matrix, source_company_id, requested_companies, top_n)
-    elif method == 'hybrid':
-        recommendations_df = hybrid_recommend(interaction_matrix, source_company_id, requested_companies, threshold, top_n)
     else:
-        raise ValueError("Method must be 'pairwise', 'multivector', or 'hybrid'")
+        raise ValueError("Method must be 'pairwise' or 'multivector'")
     
     # Call visualization
     if not recommendations_df.empty:
@@ -80,9 +78,7 @@ def pairwise_recommend(interaction_matrix, requested_companies, threshold, top_n
         for company, corr in valid_correlations.items():
             if company not in recommendation_scores:
                 recommendation_scores[company] = corr
-            else:
-                recommendation_scores[company] = max(recommendation_scores[company], corr)
-    
+        
     return convert_to_recommendations_df(recommendation_scores, 'pairwise', top_n)
 
 
@@ -101,10 +97,10 @@ def multivector_recommend(interaction_matrix, source_company_id, requested_compa
     investor_similarities = investor_similarities[investor_similarities.index != source_company_id]
     
     # Sort by similarity and get top similar investors 
-    top_similar = investor_similarities.sort_values(ascending=False).head(5)
-    print(f"\nTop 5 similar investors:")
-    for investor, sim in top_similar.items():
-        print(f"  Investor {investor}: {sim:.3f} similarity")
+    # top_similar = investor_similarities.sort_values(ascending=False).head(5)
+    # print(f"\nTop 5 similar investors:")
+    # for investor, sim in top_similar.items():
+    #     print(f"  Investor {investor}: {sim:.3f} similarity")
     
     # Calculate weighted recommendation scores
     company_scores = {}
@@ -128,35 +124,3 @@ def multivector_recommend(interaction_matrix, source_company_id, requested_compa
 
     return convert_to_recommendations_df(company_scores, 'multivector', top_n)
 
-
-def hybrid_recommend(interaction_matrix, source_company_id, requested_companies, threshold, top_n):
-    """
-    Hybrid approach combining pairwise and multivector methods.
-    """
-    # Get both types of recommendations
-    pairwise_recs = pairwise_recommend(interaction_matrix, requested_companies, threshold, top_n * 2)
-    multivector_recs = multivector_recommend(interaction_matrix, source_company_id, requested_companies, top_n * 2)
-    
-    if pairwise_recs.empty and multivector_recs.empty:
-        return pd.DataFrame(columns=['recommended company', 'hybrid_score'])
-    
-    # Normalize scores to 0-1 range for combining
-    hybrid_scores = {}
-    
-    # Add pairwise recommendations with weight (60%)
-    if not pairwise_recs.empty:
-        max_corr = pairwise_recs['correlation'].max()
-        for _, row in pairwise_recs.iterrows():
-            company = row['recommended company']
-            normalized_score = row['correlation'] / max_corr
-            hybrid_scores[company] = hybrid_scores.get(company, 0) + (normalized_score * 0.6)
-    
-    # Add multivector recommendations with weight (40%)
-    if not multivector_recs.empty:
-        max_sim = multivector_recs['similarity'].max()
-        for _, row in multivector_recs.iterrows():
-            company = row['recommended company']
-            normalized_score = row['similarity'] / max_sim
-            hybrid_scores[company] = hybrid_scores.get(company, 0) + (normalized_score * 0.4)
-    
-    return convert_to_recommendations_df(hybrid_scores, 'hybrid', top_n)

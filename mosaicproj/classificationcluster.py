@@ -3,6 +3,17 @@ from sklearn.decomposition import PCA
 import plotly.express as px
 import pandas as pd
 
+def classify_excel(df):
+    classify_df = pd.read_excel("company-list_cp.xls")
+    classify_df = classify_df.drop(columns=['Days Attending', 'Reps'])
+    classify_df = classify_df.rename(columns=
+        {
+            'Company Name' : 'target company',
+        }
+    )
+    classify_df.columns = [col.strip().lower().replace(" ", "_") for col in classify_df.columns]
+    combined_df = pd.merge(df, classify_df, on='target_company', how='left')
+    return combined_df
 
 # PCA + KMeans classification 
 def classify(recommendation_df, interaction_matrix):  
