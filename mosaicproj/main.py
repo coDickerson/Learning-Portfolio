@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
 import traceback
-from source_company import SourceCompany
 from recommender_engine import recommend
+from recommender_helpers import filter_companies_by_phrases
 
-
-#cleans excel spreadsheet into dataframe
+# Data cleaing; cleans excel spreadsheet into dataframe
 company_df = pd.read_excel("Conf 2024 Request List Update.xlsx")
 company_df = company_df.drop(columns=['Source Full Name', 'Source First', 'Source Last'])
 company_df = company_df.rename(columns = 
@@ -21,13 +20,16 @@ cols[0], cols[1] = cols[1], cols[0]
 company_df = company_df[cols] # flips source company and target company columns
 company_df = company_df.drop_duplicates()
 
-# creates the source company map containing id, requested, dates, and recommended
-grouped = company_df.groupby('source_company')
-source_company_map = {}
-for source_id, group in grouped:
-    requested = group['target_company'].tolist()
-    dates = set(group['request_date'])        
-    source_company_map[source_id] = SourceCompany(source_id, requested, dates)
+excluded_phrases = [
+    'Test Company',
+    'Floor Monitor',
+    'KeyBank',
+    'KeyBanc Capital',
+    'Mosaic Summit Thematic Dinner',
+    '(Optional)'
+]
+
+company_df = filter_companies_by_phrases(company_df, excluded_phrases, 'target_company')
 
 # obtains input from user
 user_input = input("\nEnter source company ID (e.g. 1000-1342): ").strip()
@@ -53,8 +55,7 @@ print(f"\nUsing {method} method for recommendations...")
 try:
     recommendations = recommend(
         company_df, 
-        source_id, 
-        source_company_map, 
+        source_id,  
         method=method,
         threshold=0.4,  # For pairwise method
         top_n=10

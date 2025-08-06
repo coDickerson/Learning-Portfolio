@@ -24,7 +24,7 @@ def new_classify(recommendation_df, interaction_matrix):
         # Sector distribution visualization
         
         # Sector-based PCA if enough data
-        if len(combined_df) >= 10:
+        if len(combined_df) >= 5:
             sector_pca_classify(combined_df, interaction_matrix)
     
     return combined_df

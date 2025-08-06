@@ -81,6 +81,31 @@ def visualize_results(recommendations_df, interaction_matrix, method):
     
     return recommendations_df
 
+def filter_companies_by_phrases(df, exclude_phrases, column_name='target_company'):
+    """
+    Remove companies that contain any of the specified phrases.
+    
+    Args:
+        df: DataFrame to filter
+        exclude_phrases: List of phrases to exclude (case-insensitive)
+        column_name: Column containing company names to check
+    
+    Returns:
+        Filtered DataFrame
+    """
+    if not exclude_phrases:
+        return df
+    
+    # Convert to lowercase for case-insensitive matching
+    exclude_phrases_lower = [phrase.lower() for phrase in exclude_phrases]
+    
+    # Create a mask for companies to keep (those that don't contain any excluded phrases)
+    mask = ~df[column_name].astype(str).str.lower().str.contains('|'.join(exclude_phrases_lower), na=False)
+    
+    filtered_df = df[mask].copy()
+    
+    return filtered_df
+
 
 # Backward compatibility functions for existing code
 # def pairwise(company_corr, requested_companies, threshold):

@@ -2,15 +2,15 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from recommender_helpers import convert_to_recommendations_df, visualize_results
+from source_company import SourceCompany
 
-def recommend(df, source_company_id, source_company_map, method='multivector', threshold=0.4, top_n=10):
+def recommend(df, source_company_id, method='multivector', threshold=0.4, top_n=10):
     """
     Unified recommendation function supporting multiple methods.
     
     Args:
         df: DataFrame with columns ['source_company', 'target_company']
         source_company_id: ID of the investor to generate recommendations for
-        source_company_map: Mapping of company IDs to their data
         method: 'pairwise', 'multivector'
         threshold: Minimum correlation threshold for pairwise method
         top_n: Number of recommendations to return
@@ -19,6 +19,13 @@ def recommend(df, source_company_id, source_company_map, method='multivector', t
     ie: 80% of the clients who requested meetings with Block also requested meetings with Dataiku…
     do you want to go ask your client if they might be interested?    
     """
+    # creates the source company map containing id, requested, dates, and recommended
+    grouped = df.groupby('source_company')
+    source_company_map = {}
+    for source_id, group in grouped:
+        requested = group['target_company'].tolist()
+        dates = set(group['request_date'])        
+        source_company_map[source_id] = SourceCompany(source_id, requested, dates)
 
     # Create interaction matrix
     interaction_matrix = pd.crosstab(df['source_company'], df['target_company'])
@@ -102,12 +109,6 @@ def multivector_recommend(interaction_matrix, source_company_id, requested_compa
     # Create investor similarity mapping
     investor_similarities = pd.Series(similarities, index=interaction_matrix.index)
     investor_similarities = investor_similarities[investor_similarities.index != source_company_id]
-    
-    # Sort by similarity and get top similar investors 
-    # top_similar = investor_similarities.sort_values(ascending=False).head(5)
-    # print(f"\nTop 5 similar investors:")
-    # for investor, sim in top_similar.items():
-    #     print(f"  Investor {investor}: {sim:.3f} similarity")
     
     # Calculate weighted recommendation scores
     company_scores = {}
