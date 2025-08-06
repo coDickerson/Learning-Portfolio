@@ -39,7 +39,6 @@ def print_results(recommendations_df, method, top_n):
     method_messages = {
         'pairwise': f"\nPairwise recommendations based on company correlations:",
         'multivector': f"\nMultivector recommendations based on similar investor preferences:",
-        'hybrid': f"\nHybrid recommendations combining multiple approaches:"
     }
     
     message = method_messages.get(method.lower(), f"\n{method.title()} recommendations:")
@@ -50,7 +49,6 @@ def get_score_column_name(method) :
     score_columns = {
         'pairwise' : 'correlation',
         'multivector': 'similarity',
-        'hybrid': 'hybrid_score'
     }
     return score_columns.get(method.lower(), 'score')
 

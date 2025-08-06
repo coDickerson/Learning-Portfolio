@@ -1,4 +1,3 @@
-
 class SourceCompany:
     
     def __init__(self, id, requested, dates):

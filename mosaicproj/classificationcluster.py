@@ -3,7 +3,7 @@ from sklearn.decomposition import PCA
 import plotly.express as px
 import pandas as pd
 
-def classify_excel(df):
+def excel_classify(df):
     classify_df = pd.read_excel("company-list_cp.xls")
     classify_df = classify_df.drop(columns=['Days Attending', 'Reps'])
     classify_df = classify_df.rename(columns=

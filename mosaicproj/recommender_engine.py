@@ -69,15 +69,31 @@ def pairwise_recommend(interaction_matrix, requested_companies, threshold, top_n
             continue
             
         correlations = relevant_corrs.loc[requested_company]
-        valid_correlations = correlations[
-            (correlations > threshold) & 
-            (~correlations.index.isin(requested_companies))
-        ]
         
-        # Aggregate scores (taking maximum correlation seen)
-        for company, corr in valid_correlations.items():
-            if company not in recommendation_scores:
-                recommendation_scores[company] = corr
+        # Check if correlations is a Series or DataFrame (handles duplicate companies)
+        if isinstance(correlations, pd.DataFrame):
+            # If it's a DataFrame, we need to handle it differently
+            for col in correlations.columns:
+                if col not in requested_companies:
+                    corr_value = correlations[col].iloc[0] if len(correlations) > 0 else 0
+                    if corr_value > threshold:
+                        if col not in recommendation_scores:
+                            recommendation_scores[col] = corr_value
+                        else:
+                            recommendation_scores[col] = max(recommendation_scores[col], corr_value)
+        else:
+            # Original logic for Series
+            valid_correlations = correlations[
+                (correlations > threshold) & 
+                (~correlations.index.isin(requested_companies))
+            ]
+            
+            # Aggregate scores (taking maximum correlation seen)
+            for company, corr in valid_correlations.items():
+                if company not in recommendation_scores:
+                    recommendation_scores[company] = corr
+                else:
+                    recommendation_scores[company] = max(recommendation_scores[company], corr)
         
     return convert_to_recommendations_df(recommendation_scores, 'pairwise', top_n)
 

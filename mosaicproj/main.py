@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import traceback
 from source_company import SourceCompany
 from recommender_engine import recommend
 
@@ -64,7 +65,6 @@ try:
         print(recommendations.head(10))
     else:
         print("\nNo recommendations could be generated for this investor.")
-        
+
 except Exception as e:
-    print(f"Error generating recommendations: {e}")
-    print("Please check your input and try again.")
+    traceback.print_exc()
