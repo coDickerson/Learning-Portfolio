@@ -57,43 +57,34 @@ def pairwise_recommend(interaction_matrix, requested_companies, threshold, top_n
         print("No requested companies to base recommendations on.")
         return pd.DataFrame()
     
-    # Calculate correlation matrix + relevent correlations
+    # Remove duplicates to ensure we always get a Series
+    unique_requested_companies = list(set(requested_companies))
+    
+    # Calculate correlation matrix + relevant correlations
     company_corr = interaction_matrix.corr(method='pearson')
-    relevant_corrs = company_corr.loc[requested_companies]
+    relevant_corrs = company_corr.loc[unique_requested_companies]
     
     # Aggregate recommendations across all requested companies
     recommendation_scores = {}
     
-    for requested_company in requested_companies:
+    for requested_company in unique_requested_companies:
         if requested_company not in relevant_corrs.index:
             continue
             
         correlations = relevant_corrs.loc[requested_company]
         
-        # Check if correlations is a Series or DataFrame (handles duplicate companies)
-        if isinstance(correlations, pd.DataFrame):
-            # If it's a DataFrame, we need to handle it differently
-            for col in correlations.columns:
-                if col not in requested_companies:
-                    corr_value = correlations[col].iloc[0] if len(correlations) > 0 else 0
-                    if corr_value > threshold:
-                        if col not in recommendation_scores:
-                            recommendation_scores[col] = corr_value
-                        else:
-                            recommendation_scores[col] = max(recommendation_scores[col], corr_value)
-        else:
-            # Original logic for Series
-            valid_correlations = correlations[
-                (correlations > threshold) & 
-                (~correlations.index.isin(requested_companies))
-            ]
-            
-            # Aggregate scores (taking maximum correlation seen)
-            for company, corr in valid_correlations.items():
-                if company not in recommendation_scores:
-                    recommendation_scores[company] = corr
-                else:
-                    recommendation_scores[company] = max(recommendation_scores[company], corr)
+        # Now correlations will always be a Series
+        valid_correlations = correlations[
+            (correlations > threshold) & 
+            (~correlations.index.isin(unique_requested_companies))
+        ]
+        
+        # Aggregate scores (taking maximum correlation seen)
+        for company, corr in valid_correlations.items():
+            if company not in recommendation_scores:
+                recommendation_scores[company] = corr
+            else:
+                recommendation_scores[company] = max(recommendation_scores[company], corr)
         
     return convert_to_recommendations_df(recommendation_scores, 'pairwise', top_n)
 
