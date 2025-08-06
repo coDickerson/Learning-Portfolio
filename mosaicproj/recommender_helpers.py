@@ -1,5 +1,5 @@
 import pandas as pd
-from classificationcluster import classify
+from classificationcluster import new_classify, excel_classify
 
 def convert_to_recommendations_df(scores, method, top_n):
     """
@@ -24,7 +24,7 @@ def convert_to_recommendations_df(scores, method, top_n):
         list(scores.items()),
         columns=['recommended company', score_column]
     ).sort_values(score_column, ascending=False)
-    
+    recommendations_df = excel_classify(recommendations_df)
     # Print results with method-specific messaging
     print_results(recommendations_df, method, top_n)
     
@@ -68,7 +68,7 @@ def visualize_results(recommendations_df, interaction_matrix, method):
         user_input = input('\nWould you like a visualization (y/n): ').strip().lower()
         if user_input == 'y':
             try:
-                classify(recommendations_df, interaction_matrix)
+                new_classify(recommendations_df, interaction_matrix)
                 break
             except ImportError:
                 print("Could not import classify function. Skipping visualization.")
