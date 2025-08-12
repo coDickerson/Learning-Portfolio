@@ -4,7 +4,7 @@ import plotly.express as px
 import pandas as pd
 
 def excel_classify(df):
-    classify_df = pd.read_excel("company-list_cp.xls")
+    classify_df = pd.read_excel("data/company-list_cp.xls")
     classify_df = classify_df.drop(columns=['Days Attending', 'Reps'])
     classify_df = classify_df.rename(columns=
         {

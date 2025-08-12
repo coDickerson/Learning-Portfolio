@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 import traceback
-from recommender_engine import recommend
-from recommender_helpers import filter_companies_by_phrases
+from engines.recommender_engine import recommend
+from engines.recommender_helpers import filter_companies_by_phrases
 
 # Data cleaing; cleans excel spreadsheet into dataframe
-company_df = pd.read_excel("Conf 2024 Request List Update.xlsx")
+company_df = pd.read_excel("data/Conf 2024 Request List Update.xlsx")
 company_df = company_df.drop(columns=['Source Full Name', 'Source First', 'Source Last'])
 company_df = company_df.rename(columns = 
     {  

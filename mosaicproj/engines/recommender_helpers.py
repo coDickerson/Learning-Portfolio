@@ -1,5 +1,5 @@
 import pandas as pd
-from classificationcluster import new_classify, excel_classify
+from engines.classificationcluster import new_classify, excel_classify
 
 def convert_to_recommendations_df(scores, method, top_n):
     """
@@ -105,6 +105,11 @@ def filter_companies_by_phrases(df, exclude_phrases, column_name='target_company
     filtered_df = df[mask].copy()
     
     return filtered_df
+
+    def batch_companies():
+        """
+        Batch Mosaic groups together 
+        """
 
 
 # Backward compatibility functions for existing code
