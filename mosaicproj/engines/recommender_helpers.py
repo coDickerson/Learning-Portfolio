@@ -24,8 +24,6 @@ def convert_to_recommendations_df(scores, method, top_n):
         columns=['recommended company', score_column]
     ).sort_values(score_column, ascending=False)
     recommendations_df = excel_classify(recommendations_df)
-    # Print results with method-specific messaging
-    print_results(recommendations_df, method, top_n)
     
     return recommendations_df
 
@@ -98,7 +96,10 @@ def filter_companies_by_phrases(df, exclude_phrases, column_name='target_company
     exclude_phrases_lower = [phrase.lower() for phrase in exclude_phrases]
     
     # Create a mask for companies to keep (those that don't contain any excluded phrases)
-    mask = ~df[column_name].astype(str).str.lower().str.contains('|'.join(exclude_phrases_lower), na=False)
+    # Escape regex special characters to avoid warnings
+    import re
+    escaped_phrases = [re.escape(phrase) for phrase in exclude_phrases_lower]
+    mask = ~df[column_name].astype(str).str.lower().str.contains('|'.join(escaped_phrases), na=False)
     
     filtered_df = df[mask].copy()
     
@@ -250,3 +251,46 @@ def sector_pca_visualize(X_reduced, sectors, labels, scores=None, score_col_name
         
     except Exception as e:
         print(f"Error in sector PCA visualization: {e}")
+
+def batch_mosaic_summit_entries(df, column_name='target_company'):
+    """
+    Batch Mosaic Summit entries based on what comes after the colon.
+    
+    For example:
+    - "Mosaic Summit 1x1: AI, ML & Advanced Data Science - Assessing the GenAI Data Stack"
+    - "Mosaic Summit Small Group: AI, ML & Advanced Data Science - Assessing the GenAI Data Stack"
+    
+    Will both be converted to: "Mosaic Summit: AI, ML & Advanced Data Science - Assessing the GenAI Data Stack"
+    
+    Args:
+        df: DataFrame containing the data
+        column_name: Column containing company names to process
+    
+    Returns:
+        DataFrame with batched Mosaic Summit entries
+    """
+    df_copy = df.copy()
+    
+    # Function to extract and standardize Mosaic Summit entries
+    def standardize_mosaic_summit(company_name):
+        if pd.isna(company_name):
+            return company_name
+            
+        company_str = str(company_name).strip()
+        
+        # Check if it's a Mosaic Summit entry
+        if 'mosaic summit' in company_str.lower():
+            # Find the colon position
+            colon_pos = company_str.find(':')
+            if colon_pos != -1:
+                # Extract everything after the colon and clean it up
+                after_colon = company_str[colon_pos + 1:].strip()
+                # Standardize to "Mosaic Summit: [content after colon]"
+                return f"Mosaic Summit: {after_colon}"
+        
+        return company_name
+    
+    # Apply the standardization
+    df_copy[column_name] = df_copy[column_name].apply(standardize_mosaic_summit)
+    
+    return df_copy

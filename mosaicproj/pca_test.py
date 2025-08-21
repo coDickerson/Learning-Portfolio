@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from engines.classificationcluster import sector_pca_visualize
+from engines.recommender_helpers import sector_pca_visualize
 from sklearn.decomposition import PCA
 
 def test_enhanced_hover_visualization():

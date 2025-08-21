@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from engines.recommender_helpers import convert_to_recommendations_df, visualize_results
+from engines.recommender_helpers import convert_to_recommendations_df
 from engines.source_company import SourceCompany
 
 def recommend(df, source_company_id, method='multivector', threshold=0.4, top_n=10):
@@ -48,10 +48,6 @@ def recommend(df, source_company_id, method='multivector', threshold=0.4, top_n=
         recommendations_df = multivector_recommend(interaction_matrix, source_company_id, requested_companies, top_n)
     else:
         raise ValueError("Method must be 'pairwise' or 'multivector'")
-    
-    # Call visualization
-    if not recommendations_df.empty:
-        visualize_results(recommendations_df, interaction_matrix, method)
     
     return recommendations_df
 
