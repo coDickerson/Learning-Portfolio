@@ -10,20 +10,45 @@ def convert_to_recommendations_df(scores, method, top_n):
         top_n (int): Number of top recommendations to return
     
     Returns:
-        pd.DataFrame: Formatted recommendations with appropriate column names
+        pd.DataFrame: Formatted recommendations with company names as index
     """
     score_column = get_score_column_name(method)
 
     if not scores:
         # Return empty DataFrame with appropriate columns based on method
-        return pd.DataFrame(columns=['recommended company', score_column])
+        return pd.DataFrame(columns=[score_column])
     
-    # Convert to DataFrame
+    # Convert to DataFrame and set company names as index
     recommendations_df = pd.DataFrame(
         list(scores.items()),
         columns=['recommended company', score_column]
     ).sort_values(score_column, ascending=False)
-    recommendations_df = excel_classify(recommendations_df)
+    
+    # Set company names as index
+    recommendations_df = recommendations_df.set_index('recommended company')
+    
+    # Apply classification if possible
+    try:
+        # Reset index for classification
+        temp_df = recommendations_df.reset_index()
+        temp_df = excel_classify(temp_df)
+        # Re-set index after classification
+        if 'recommended company' in temp_df.columns:
+            recommendations_df = temp_df.set_index('recommended company')
+        else:
+            # If classification changed column names, try to find the right column
+            for col in temp_df.columns:
+                if 'company' in col.lower():
+                    recommendations_df = temp_df.set_index(col)
+                    break
+            else:
+                # Fallback: use first column as index
+                recommendations_df = temp_df.set_index(temp_df.columns[0])
+    except Exception as e:
+        print(f"Warning: Classification failed: {e}")
+        # Ensure we have company names as index
+        if 'recommended company' in recommendations_df.columns:
+            recommendations_df = recommendations_df.set_index('recommended company')
     
     return recommendations_df
 
@@ -105,8 +130,98 @@ def filter_companies_by_phrases(df, exclude_phrases, column_name='target_company
     
     return filtered_df
 
+def load_kbcm_coverage():
+    """Load KBCM coverage data from text file."""
+    coverage_data = {}
+    try:
+        with open("data/kbcm_coverage.txt", 'r') as file:
+            for line in file:
+                line = line.strip()
+                if not line or line == "KBCM Coverage":
+                    continue
+                    
+                # Check if this is an analyst line (contains parentheses and colon)
+                if '(' in line and ')' in line and ':' in line:
+                    # Extract analyst name and coverage type
+                    analyst_part = line.split('(')[0].strip()
+                    coverage_type_part = line.split('(')[1].split(')')[0]
+                    
+                    # Extract tickers (everything after the colon)
+                    ticker_part = line.split('):')[1].strip()
+                    tickers = [ticker.strip() for ticker in ticker_part.split(',')]
+                    
+                    # Store coverage information
+                    for ticker in tickers:
+                        if ticker:  # Skip empty tickers
+                            coverage_data[ticker] = {
+                                'analyst': analyst_part,
+                                'sector': coverage_type_part,
+                                'coverage_type': coverage_type_part
+                            }
+                            
+    except FileNotFoundError:
+        print("Warning: kbcm_coverage.txt not found.")
+    except Exception as e:
+        print(f"Warning: Error loading KBCM coverage: {e}")
+    
+    return coverage_data
+
+def classify_company_status(df):
+    """Classify companies as public/private and add coverage information."""
+    try:
+        # Load KBCM coverage data
+        coverage_data = load_kbcm_coverage()
+        
+        # Add company status classification
+        df['company_status'] = 'Private'  # Default to private
+        
+        # Check if company has a ticker
+        if 'ticker' in df.columns:
+            # Companies with tickers are considered public
+            df.loc[df['ticker'].notna() & (df['ticker'] != ''), 'company_status'] = 'Public'
+            
+            # Add coverage information for public companies
+            df['analyst'] = None
+            df['coverage_sector'] = None
+            df['coverage_type'] = None
+            
+            for idx, row in df.iterrows():
+                ticker = row['ticker']
+                if pd.notna(ticker) and ticker in coverage_data:
+                    df.at[idx, 'analyst'] = coverage_data[ticker]['analyst']
+                    df.at[idx, 'coverage_sector'] = coverage_data[ticker]['sector']
+                    df.at[idx, 'coverage_type'] = coverage_data[ticker]['coverage_type']
+        
+        # Create enhanced description
+        df['enhanced_description'] = df.apply(lambda row: create_enhanced_description(row), axis=1)
+        
+        return df
+        
+    except Exception as e:
+        print(f"Warning: Error in company status classification: {e}")
+        return df
+
+def create_enhanced_description(row):
+    """Create enhanced description based on company status and coverage."""
+    company_name = row.get('recommended_company', 'Unknown Company')
+    ticker = row.get('ticker', '')
+    sector = row.get('sector', 'Unknown Sector')
+    status = row.get('company_status', 'Unknown')
+    
+    if status == 'Public':
+        analyst = row.get('analyst', '')
+        coverage_sector = row.get('coverage_sector', '')
+        coverage_type = row.get('coverage_type', '')
+        
+        if analyst and coverage_sector:
+            return f"{company_name} ({ticker}) - {sector} | Public | Covered by {analyst} ({coverage_sector}: {coverage_type})"
+        else:
+            return f"{company_name} ({ticker}) - {sector} | Public | No KBCM coverage"
+    else:
+        return f"{company_name} ({ticker}) - {sector} | Private"
+
 def excel_classify(df):
-    """Classify companies using external Excel data."""
+    """Classify companies using external Excel data with public/private classification."""
     try:
         classify_df = pd.read_excel("data/company-list_cp.xls")
         classify_df = classify_df.drop(columns=['Days Attending', 'Reps'])
@@ -116,6 +231,10 @@ def excel_classify(df):
         classify_df.columns = [col.strip().lower().replace(" ", "_") for col in classify_df.columns]
         df.columns = [col.strip().lower().replace(" ", "_") for col in df.columns]
         combined_df = pd.merge(df, classify_df, on='recommended_company', how='left')
+        
+        # Add company status classification
+        combined_df = classify_company_status(combined_df)
+        
         return combined_df
     except FileNotFoundError:
         print("Warning: company-list_cp.xls not found. Returning original DataFrame.")
@@ -254,13 +373,13 @@ def sector_pca_visualize(X_reduced, sectors, labels, scores=None, score_col_name
 
 def batch_mosaic_summit_entries(df, column_name='target_company'):
     """
-    Batch Mosaic Summit entries based on what comes after the colon.
+    Batch Mosaic Summit entries based on the topic/subject after the colon and before the dash.
     
-    For example:
+    This groups related sessions together by extracting the core topic:
     - "Mosaic Summit 1x1: AI, ML & Advanced Data Science - Assessing the GenAI Data Stack"
-    - "Mosaic Summit Small Group: AI, ML & Advanced Data Science - Assessing the GenAI Data Stack"
+    - "Mosaic Summit Small Group: AI, ML & Advanced Data Science - GenAI Use Cases in the Enterprise"
     
-    Will both be converted to: "Mosaic Summit: AI, ML & Advanced Data Science - Assessing the GenAI Data Stack"
+    Will both be converted to: "Mosaic Summit: AI, ML & Advanced Data Science"
     
     Args:
         df: DataFrame containing the data
@@ -280,13 +399,41 @@ def batch_mosaic_summit_entries(df, column_name='target_company'):
         
         # Check if it's a Mosaic Summit entry
         if 'mosaic summit' in company_str.lower():
+            # Remove "(Optional)" prefix if present
+            if company_str.lower().startswith('(optional)'):
+                company_str = company_str[10:].strip()
+            
             # Find the colon position
             colon_pos = company_str.find(':')
             if colon_pos != -1:
-                # Extract everything after the colon and clean it up
+                # Extract everything after the colon
                 after_colon = company_str[colon_pos + 1:].strip()
-                # Standardize to "Mosaic Summit: [content after colon]"
-                return f"Mosaic Summit: {after_colon}"
+                
+                # Find the dash position to extract just the topic
+                dash_pos = after_colon.find(' - ')
+                if dash_pos != -1:
+                    # Extract topic (everything before the dash)
+                    topic = after_colon[:dash_pos].strip()
+                    return f"Mosaic Summit: {topic}"
+                else:
+                    # No dash found, use everything after colon
+                    return f"Mosaic Summit: {after_colon}"
+            else:
+                # No colon found, handle special cases
+                if 'mosaic summit thematic dinner' in company_str.lower():
+                    return "Mosaic Summit: Thematic Dinner"
+                elif 'mosaic summit birds of a feather' in company_str.lower():
+                    return "Mosaic Summit: Birds of a Feather"
+                else:
+                    # Try to extract meaningful content after "Mosaic Summit"
+                    mosaic_pos = company_str.lower().find('mosaic summit') + len('mosaic summit')
+                    after_mosaic = company_str[mosaic_pos:].strip()
+                    if after_mosaic.startswith(':') or after_mosaic.startswith(' -'):
+                        after_mosaic = after_mosaic[1:].strip()
+                    if after_mosaic:
+                        return f"Mosaic Summit: {after_mosaic}"
+                    else:
+                        return "Mosaic Summit: General"
         
         return company_name
     

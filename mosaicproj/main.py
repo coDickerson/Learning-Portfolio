@@ -41,7 +41,19 @@ def run_recommendation_system(company_df):
         
         if not recommendations.empty:
             print(f"\n=== FINAL RECOMMENDATIONS ===")
-            print(recommendations.head(10))
+            
+            # Display enhanced descriptions if available
+            if 'enhanced_description' in recommendations.columns:
+                print("\nTop Recommendations:")
+                for i, (_, row) in enumerate(recommendations.head(10).iterrows(), 1):
+                    print(f"{i}. {row['enhanced_description']}")
+                    if 'correlation' in row:
+                        print(f"   Correlation: {row['correlation']:.3f}")
+                    elif 'similarity' in row:
+                        print(f"   Similarity: {row['similarity']:.3f}")
+                    print()
+            else:
+                print(recommendations.head(10))
         else:
             print("\nNo recommendations could be generated for this investor.")
 
@@ -107,8 +119,23 @@ def run_cohort_analysis(company_df):
         try:
             recommendations = analyzer.generate_cohort_recommendations(target_cohort, method=method)
             print(f"\nTop 5 recommendations for cohort {target_cohort}:")
-            for i, (company, score) in enumerate(list(recommendations.items())[:5], 1):
-                print(f"{i}. {company}: {score:.2f}")
+            
+            # Convert recommendations dict to DataFrame for enhanced display
+            rec_df = pd.DataFrame(list(recommendations.items()), columns=['recommended_company', 'score'])
+            rec_df = rec_df.head(5)
+            
+            # Apply enhanced classification
+            from engines.recommender_helpers import excel_classify
+            rec_df = excel_classify(rec_df)
+            
+            for i, (_, row) in enumerate(rec_df.iterrows(), 1):
+                if 'enhanced_description' in row:
+                    print(f"{i}. {row['enhanced_description']}")
+                    print(f"   Score: {row['score']:.2f}")
+                else:
+                    print(f"{i}. {row['recommended_company']}: {row['score']:.2f}")
+                print()
+                
         except Exception as e:
             print(f"Error generating recommendations: {e}")
             traceback.print_exc()
@@ -147,7 +174,7 @@ def main():
         'Floor Monitor',
         'KeyBank',
         'KeyBanc Capital',
-        'Mosaic Summit Thematic Dinner',
+        'Mosaic Summit: Thematic Dinner',
         '(Optional)'
     ]
 
